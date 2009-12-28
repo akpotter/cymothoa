@@ -91,45 +91,48 @@ void set_interpreter(char *shellcode, char *_interpreter)
 //
 void set_script(char *shellcode, char *_cmd, char *_file)
 {
- char *ptr = NULL;
- char *cmd = _cmd, *file = _file;
+    char *ptr = NULL;
+    char *cmd = _cmd, *file = _file;
 
- if(!cmd) cmd = "echo test";
- if(!file) file = "./script";
+    if(!cmd) cmd = "echo test";
+    if(!file) file = "./script";
 
- if((ptr = index(shellcode, script_mark)) == NULL) mark_not_found("script");
+    if((ptr = index(shellcode, script_mark)) == NULL) mark_not_found("script");
 
- if(cmd != NULL)
- {
-  payload_len += strlen(cmd);
-  if(realloc(sh_buffer, payload_len) == NULL) exit(-1);
+    if(cmd != NULL)
+    {
+        payload_len += strlen(cmd);
+        if(realloc(sh_buffer, payload_len) == NULL) exit(-1);
 
-  strcpy(ptr, cmd);
- }
- else if(file != NULL)
- {
-  FILE *script_file;
-  char _char;
-  long script_len = 0;
+        strcpy(ptr, cmd);
+    }
+    else if(file != NULL)
+    {
+        FILE *script_file = NULL;
+        char _char;
+        long script_len = 0;
 
-  if( (script_file = fopen(file, "r")) == NULL) exit(-1);
+        if((script_file = fopen(file, "r")) == NULL) {
+            perror("Error opening script file");            
+            exit(-1);
+        }
 
-  fseek(script_file, 0L, SEEK_END);
-  script_len = ftell(script_file);
+        fseek(script_file, 0L, SEEK_END);
+        script_len = ftell(script_file);
 
-  payload_len += script_len;
-  if(realloc(sh_buffer, payload_len) == NULL) exit(-1);
+        payload_len += script_len;
+        if(realloc(sh_buffer, payload_len) == NULL) exit(-1);
 
-  rewind(script_file);
+        rewind(script_file);
 
-  while( (_char = fgetc(script_file)) != EOF)
-  {
-   *ptr = _char;
-   ptr++;
-  }
+        while( (_char = fgetc(script_file)) != EOF)
+        {
+            *ptr = _char;
+            ptr++;
+        }
 
-  fclose(script_file);
- }
+        fclose(script_file);
+    }
 }
 
 //
