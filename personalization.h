@@ -5,8 +5,8 @@
 //
 void mark_not_found(const char *type)
 {
- printf("[!] ERROR: %s mark not found. Check your payload\n", type);
- exit(-1);
+    printf("[!] ERROR: %s mark not found. Check your payload\n", type);
+    exit(-1);
 }
 
 //
@@ -71,21 +71,21 @@ void set_password(char *shellcode, char *password)
 //
 void set_interpreter(char *shellcode, char *_interpreter)
 {
- char *ptr = NULL;
- char *interpreter = _interpreter;
- int interp_len, bytes_to_move;
+    char *ptr = NULL;
+    char *interpreter = _interpreter;
+    int interp_len, bytes_to_move;
 
- if(!interpreter) interpreter = "/bin/bash";
- interp_len = strlen(interpreter);
+    if(!interpreter) interpreter = "/bin/bash";
+    interp_len = strlen(interpreter);
 
- if(!(ptr = index(shellcode, interp_mark))) mark_not_found("interpreter");
+    if(!(ptr = index(shellcode, interp_mark))) mark_not_found("interpreter");
 
- payload_len += (interp_len - 1);
- if(!realloc(sh_buffer, payload_len)) exit(-1);
+    payload_len += (interp_len - 1);
+    if(!realloc(sh_buffer, payload_len)) exit(-1);
 
- bytes_to_move = payload_len - (ptr - sh_buffer) - interp_len;
- strncpy(ptr+interp_len, ptr+1, bytes_to_move);
- strncpy(ptr, interpreter, interp_len);
+    bytes_to_move = payload_len - (ptr - sh_buffer) - interp_len;
+    strncpy(ptr+interp_len, ptr+1, bytes_to_move);
+    strncpy(ptr, interpreter, interp_len);
 }
 
 //
