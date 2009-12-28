@@ -89,30 +89,30 @@ void set_interpreter(char *shellcode, char *_interpreter)
 }
 
 //
-void set_script(char *shellcode, char *_cmd, char *_file)
+void set_script(char *shellcode, char *_cmd, char *file)
 {
     char *ptr = NULL;
-    char *cmd = _cmd, *file = _file;
+    char *cmd = _cmd;
 
-    if(!cmd) cmd = "echo test";
-    if(!file) file = "./script";
+    if(!cmd && !file) cmd = "echo test";
 
-    if((ptr = index(shellcode, script_mark)) == NULL) mark_not_found("script");
+    if(!(ptr = index(shellcode, script_mark))) mark_not_found("script");
 
-    if(cmd != NULL)
+    if(cmd)
     {
         payload_len += strlen(cmd);
-        if(realloc(sh_buffer, payload_len) == NULL) exit(-1);
+        if(!realloc(sh_buffer, payload_len)) exit(-1);
 
         strcpy(ptr, cmd);
     }
-    else if(file != NULL)
+    else if(file)
     {
         FILE *script_file = NULL;
-        char _char;
+        //char _char;
         long script_len = 0;
+        int i;
 
-        if((script_file = fopen(file, "r")) == NULL) {
+        if(!(script_file = fopen(file, "r"))) {
             perror("Error opening script file");            
             exit(-1);
         }
@@ -121,16 +121,19 @@ void set_script(char *shellcode, char *_cmd, char *_file)
         script_len = ftell(script_file);
 
         payload_len += script_len;
-        if(realloc(sh_buffer, payload_len) == NULL) exit(-1);
+        if(!realloc(sh_buffer, payload_len)) exit(-1);
 
         rewind(script_file);
 
+        for(i=0; i<script_len; i++) *(ptr++) = fgetc(script_file);
+/*
         while( (_char = fgetc(script_file)) != EOF)
         {
+            printf("%c", *ptr);////
             *ptr = _char;
             ptr++;
         }
-
+*/
         fclose(script_file);
     }
 }
@@ -138,7 +141,7 @@ void set_script(char *shellcode, char *_cmd, char *_file)
 //
 void personalize_shellcode(void)
 {
-    //printf("[DBG] Payload before personalization:\n%s\n", sh_buffer);
+    printf("[DBG] Payload before personalization:\n%s\n", sh_buffer);
     if(args.my_ip) set_ip(sh_buffer, args.my_ip);
     if(args.my_port) set_port(sh_buffer, args.my_port);
     if(args.my_username) set_username(sh_buffer, args.my_username);
@@ -148,6 +151,6 @@ void personalize_shellcode(void)
      set_interpreter(sh_buffer, args.interpreter);
      set_script(sh_buffer, args.perl_code, args.perl_file);
     }
-    //printf("[DBG] Payload after personalization:\n%s\n", sh_buffer);
+    printf("[DBG] Payload after personalization:\n%s\n", sh_buffer);
 }
 
