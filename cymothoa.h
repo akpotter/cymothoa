@@ -57,20 +57,20 @@ struct payload {
 
 // arguments structure
 struct arguments {
-    
+
     // standard arguments:
     pid_t pid;           // process pid
     int payload_index;   // the selected payload
     char *lib_name;      // library region where to put the shellcode
-    
+
     // payload personalization options:
     uint32_t my_ip;      // our ip address
     uint16_t my_port;    // our port number
     char *my_username;   // our username
     char *my_password;   // our password
     char *interpreter;   // script interpreter
-    char *perl_code;     // perl code
-    char *perl_file;     // perl script file
+    char *script_code;     // perl code
+    char *script_file;     // perl script file
 
     // actions
     int show_help:1;     // show the help/usage screen

