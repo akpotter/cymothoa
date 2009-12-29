@@ -41,7 +41,7 @@ char usage_text[] = "\nUsage:\n"
                     "\t-x\tset the IP (def 65.65.65.65)\n"
                     "\t-y\tset the port number (def 16962)\n"
                     "\t-z\tset the username (3 bytes) (def CCC)\n"
-                    "\t-o\tset the password (4 bytes) (def DDDD)\n"
+                    "\t-o\tset the password (8 bytes) (def DDDD)\n"
                     "\t-i\tset the interpreter (def /bin/bash)\n"
                     "\t-c\tset the script code (from cmd line)\n"
                     "\t-C\tset the script code (load from file)\n";

@@ -25,7 +25,6 @@ void set_port(char *shellcode, u_int16_t port)
     char *ptr = NULL;
 
     if(!(ptr = memchr(shellcode, port_mark, payload_len))) mark_not_found("port");
-    //ptr = index(shellcode, mark); //crashes if IP contains NULL bytes
 
     *(u_int16_t*)ptr = port;
 }
@@ -46,7 +45,7 @@ void set_username(char *shellcode, char *username)
     strncpy(ptr, name, 3);
 }
 
-// password = 4 chars
+// password = 8 chars
 void set_password(char *shellcode, char *password)
 {
     char pass[8];
@@ -61,7 +60,7 @@ void set_password(char *shellcode, char *password)
 
     strncpy(pass, password, (pass_len < 8) ? pass_len : 8);
 
-    strncpy(ptr1, pass+4, 4);
+    strncpy(ptr1, pass + 4, 4);
     strncpy(ptr2, pass, 4);
 
 }
