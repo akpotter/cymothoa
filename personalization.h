@@ -78,7 +78,7 @@ void set_interpreter(char *shellcode, char *_interpreter)
     if(!(ptr = index(shellcode, interp_mark))) mark_not_found("interpreter");
 
     payload_len += (interp_len - 1);
-    if(!realloc(sh_buffer, payload_len)) exit(-1);
+    if(!realloc(shellcode, payload_len)) exit(-1);
 
     bytes_to_move = payload_len - (ptr - sh_buffer) - interp_len;
     strncpy(ptr+interp_len, ptr+1, bytes_to_move);
@@ -93,14 +93,14 @@ void set_script(char *shellcode, char *_cmd, char *file)
     int cmd_len = 0;
 
     if(!cmd && !file) cmd = "echo test";
-    cmd_len = strlen(cmd);
-
     if(!(ptr = index(shellcode, script_mark))) mark_not_found("script");
 
     if(cmd)
     {
+        cmd_len = strlen(cmd);
+
         payload_len += cmd_len;
-        if(!realloc(sh_buffer, payload_len+1)) exit(-1);
+        if(!realloc(shellcode, payload_len+1)) exit(-1);
 
         strncpy(ptr, cmd, cmd_len);
         *(ptr + cmd_len) = '\0';
@@ -120,13 +120,18 @@ void set_script(char *shellcode, char *_cmd, char *file)
         script_len = ftell(script_file);
 
         payload_len += script_len;
-        if(!realloc(sh_buffer, payload_len+1)) exit(-1);
+        if(!realloc(shellcode, payload_len+1)) exit(-1);
 
         rewind(script_file);
 
-        for(i=0; i<script_len; i++) *(ptr++) = fgetc(script_file);
+        char *foo = index(shellcode, script_mark);
 
-        *(ptr++) = '\0';
+        while(!feof(script_file)) {
+            ptr[0] = fgetc(script_file);
+            ptr++;
+            ptr[0] = '\0';
+            puts(foo);
+        }
 
         fclose(script_file);
     }

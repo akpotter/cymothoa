@@ -123,10 +123,10 @@ int ptrace_infect()
 
         printf("\n register info: \n");
         printf(" -----------------------------------------------------------\n");
-        printf(" eax is at: 0x%.8x\t", reg.AX);
-        printf(" ebx is at: 0x%.8x\n", reg.BX);
-        printf(" esp is at: 0x%.8x\t", reg.STACK_POINTER);
-        printf(" eip is at: 0x%.8x\n", reg.INST_POINTER);
+        printf(" eax is at: 0x%lx\t", reg.AX);
+        printf(" ebx is at: 0x%lx\n", reg.BX);
+        printf(" esp is at: 0x%lx\t", reg.STACK_POINTER);
+        printf(" eip is at: 0x%lx\n", reg.INST_POINTER);
         printf(" ------------------------------------------------------------\n\n");
 
         reg.STACK_POINTER -= BLOCK_SIZE; // decrement STACK_POINTER
