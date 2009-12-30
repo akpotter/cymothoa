@@ -171,7 +171,7 @@ int parse_arguments(int argc,char **argv)
     args.payload_index=-1;
 
     // list of the options getopt have to get
-    char short_options[] = "p:s:l:x:y:z:o:i:c:C:hS";
+    char short_options[] = "p:s:l:x:y:r:z:o:i:c:hS";
 
     // PARSE ARGUMENTS...
 
@@ -198,6 +198,10 @@ int parse_arguments(int argc,char **argv)
                 args.my_port = htons(atoi(optarg));
                 break;
 
+            case 'r': // option port number 2
+                args.my_port2 = htons(atoi(optarg));
+                break;
+
             case 'z': // option username
                 args.my_username = optarg;
                 break;
@@ -212,10 +216,6 @@ int parse_arguments(int argc,char **argv)
 
             case 'c': // script code
                 args.script_code = optarg;
-                break;
-
-            case 'C': // script file
-                args.script_file = optarg;
                 break;
 
             case 'h': // show help/usage

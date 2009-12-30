@@ -38,13 +38,13 @@ char usage_text[] = "\nUsage:\n"
                     "\t-h\tprint this help screen\n"
                     "\t-S\tlist available shellcodes\n\n"
                     "Payload personalization options:\n"
-                    "\t-x\tset the IP (def 65.65.65.65)\n"
-                    "\t-y\tset the port number (def 16962)\n"
-                    "\t-z\tset the username (3 bytes) (def CCC)\n"
-                    "\t-o\tset the password (8 bytes) (def DDDD)\n"
+                    "\t-x\tset the IP\n"
+                    "\t-y\tset the port number\n"
+                    "\t-r\tset the port number 2\n"
+                    "\t-z\tset the username (3 bytes)\n"
+                    "\t-o\tset the password (8 bytes)\n"
                     "\t-i\tset the interpreter (def /bin/bash)\n"
-                    "\t-c\tset the script code (from cmd line)\n"
-                    "\t-C\tset the script code (load from file)\n";
+                    "\t-c\tset the script code (from cmd line)\n";
 
 
 // STRUCTURES:
@@ -66,11 +66,11 @@ struct arguments {
     // payload personalization options:
     uint32_t my_ip;      // our ip address
     uint16_t my_port;    // our port number
+    uint16_t my_port2;   // our port number 2
     char *my_username;   // our username
     char *my_password;   // our password
     char *interpreter;   // script interpreter
-    char *script_code;     // perl code
-    char *script_file;     // perl script file
+    char *script_code;   // script code
 
     // actions
     int show_help:1;     // show the help/usage screen
