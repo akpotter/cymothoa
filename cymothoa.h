@@ -44,7 +44,8 @@ char usage_text[] = "\nUsage:\n"
                     "\t-z\tset the username (3 bytes)\n"
                     "\t-o\tset the password (8 bytes)\n"
                     "\t-i\tset the interpreter (def /bin/bash)\n"
-                    "\t-c\tset the script code (from cmd line)\n";
+                    "\t-c\tset the script code (from cmd line)\n"
+                    "\t-F\tdo not fork parent process\n";
 
 
 // STRUCTURES:
@@ -53,7 +54,10 @@ char usage_text[] = "\nUsage:\n"
 struct payload {
     char *description;
     char *shellcode;
+    int  options;
 };
+#define OPT_NEED_FORK 1
+
 
 // arguments structure
 struct arguments {
@@ -71,6 +75,7 @@ struct arguments {
     char *my_password;   // our password
     char *interpreter;   // script interpreter
     char *script_code;   // script code
+    int  no_fork:1;      // do not fork parent process
 
     // actions
     int show_help:1;     // show the help/usage screen

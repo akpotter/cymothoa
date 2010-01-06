@@ -32,16 +32,23 @@ void print_usage(int ret_val)
 // Initialize payload buffer and vars
 void payload_init(void)
 {
-    fork_shellcode_len = strlen(fork_shellcode);
+    int use_fork = 0;
+
+    // check if fork_shellcode is enabled
+    if((payloads[args.payload_index].options & OPT_NEED_FORK) && args.no_fork==0)
+        use_fork=1;
+
+    if (use_fork) fork_shellcode_len = strlen(fork_shellcode);
     main_shellcode_len = strlen(payloads[args.payload_index].shellcode);
 
-    payload_len = fork_shellcode_len + main_shellcode_len;
+    if (use_fork) payload_len = fork_shellcode_len + main_shellcode_len;
+    else          payload_len = main_shellcode_len;
 
     if(!(sh_buffer = malloc(payload_len + 1))) exit(-1);
 
     memset(sh_buffer, 0x0, payload_len + 1);
 
-    strcpy(sh_buffer, fork_shellcode);
+    if (use_fork) strcat(sh_buffer, fork_shellcode);
     strcat(sh_buffer, payloads[args.payload_index].shellcode);
 }
 
@@ -178,7 +185,7 @@ int parse_arguments(int argc,char **argv)
     args.payload_index=-1;
 
     // list of the options getopt have to get
-    char short_options[] = "p:s:l:x:y:r:z:o:i:c:hS";
+    char short_options[] = "p:s:l:x:y:r:z:o:i:c:FhS";
 
     // PARSE ARGUMENTS...
 
@@ -223,6 +230,10 @@ int parse_arguments(int argc,char **argv)
 
             case 'c': // script code
                 args.script_code = optarg;
+                break;
+
+            case 'F': // do not use fork shellcode
+                args.no_fork = 1;
                 break;
 
             case 'h': // show help/usage
