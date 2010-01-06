@@ -80,7 +80,10 @@ struct arguments {
 
 char *sh_buffer = NULL;
 
+int fork_shellcode_len;
+int main_shellcode_len;
 int payload_len;
+
 int payload_count;
 
 #include "payloads.h"

