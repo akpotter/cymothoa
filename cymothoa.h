@@ -57,7 +57,7 @@ struct payload {
     int  options;
 };
 #define OPT_NEED_FORK 1
-
+#define OPT_NEED_MMAP 2
 
 // arguments structure
 struct arguments {
